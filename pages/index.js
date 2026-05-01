@@ -7,6 +7,7 @@ import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
 import { DynamicLayout } from '@/themes/theme'
 import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
+import { delay } from '@/lib/utils'
 
 /**
  * 首页布局
@@ -25,7 +26,11 @@ const Index = props => {
 export async function getStaticProps(req) {
   const { locale } = req
   const from = 'index'
-  const props = await fetchGlobalAllData({ from, locale })
+  let props = await fetchGlobalAllData({ from, locale })
+  if (isNotionFetchFailed(props)) {
+    await delay(1000)
+    props = await fetchGlobalAllData({ from: `${from}-retry`, locale })
+  }
   const POST_PREVIEW_LINES = siteConfig(
     'POST_PREVIEW_LINES',
     12,
@@ -56,17 +61,19 @@ export async function getStaticProps(req) {
     }
   }
 
-  // 生成robotTxt
-  generateRobotsTxt(props)
-  // 生成Feed订阅
-  generateRss(props)
-  // 生成
-  generateSitemapXml(props)
-  // 检查数据是否需要从algolia删除
-  checkDataFromAlgolia(props)
-  if (siteConfig('UUID_REDIRECT', false, props?.NOTION_CONFIG)) {
-    // 生成重定向 JSON
-    generateRedirectJson(props)
+  if (shouldRunBuildTasks()) {
+    // 生成robotTxt
+    generateRobotsTxt(props)
+    // 生成Feed订阅
+    await generateRss(props)
+    // 生成
+    generateSitemapXml(props)
+    // 检查数据是否需要从algolia删除
+    await checkDataFromAlgolia(props)
+    if (siteConfig('UUID_REDIRECT', false, props?.NOTION_CONFIG)) {
+      // 生成重定向 JSON
+      generateRedirectJson(props)
+    }
   }
 
   // 生成全文索引 - 仅在 yarn build 时执行 && process.env.npm_lifecycle_event === 'build'
@@ -83,6 +90,14 @@ export async function getStaticProps(req) {
           props.NOTION_CONFIG
         )
   }
+}
+
+function isNotionFetchFailed(props) {
+  return props?.allPages?.some(page => page?.slug === 'oops')
+}
+
+function shouldRunBuildTasks() {
+  return process.env.npm_lifecycle_event === 'build' || process.env.EXPORT
 }
 
 export default Index
