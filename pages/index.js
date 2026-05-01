@@ -62,18 +62,7 @@ export async function getStaticProps(req) {
   }
 
   if (shouldRunBuildTasks()) {
-    // 生成robotTxt
-    generateRobotsTxt(props)
-    // 生成Feed订阅
-    await generateRss(props)
-    // 生成
-    generateSitemapXml(props)
-    // 检查数据是否需要从algolia删除
-    await checkDataFromAlgolia(props)
-    if (siteConfig('UUID_REDIRECT', false, props?.NOTION_CONFIG)) {
-      // 生成重定向 JSON
-      generateRedirectJson(props)
-    }
+    await runBuildTasks(props)
   }
 
   // 生成全文索引 - 仅在 yarn build 时执行 && process.env.npm_lifecycle_event === 'build'
@@ -98,6 +87,26 @@ function isNotionFetchFailed(props) {
 
 function shouldRunBuildTasks() {
   return process.env.npm_lifecycle_event === 'build' || process.env.EXPORT
+}
+
+async function runBuildTasks(props) {
+  const tasks = [
+    ['robots', () => generateRobotsTxt(props)],
+    ['rss', () => generateRss(props)],
+    ['sitemap', () => generateSitemapXml(props)],
+    ['algolia', () => checkDataFromAlgolia(props)]
+  ]
+  if (siteConfig('UUID_REDIRECT', false, props?.NOTION_CONFIG)) {
+    tasks.push(['redirect', () => generateRedirectJson(props)])
+  }
+
+  for (const [name, task] of tasks) {
+    try {
+      await task()
+    } catch (error) {
+      console.warn(`[Index build task] ${name} skipped`, error?.message)
+    }
+  }
 }
 
 export default Index
