@@ -53,6 +53,10 @@ const preBuild = (function () {
     fs.unlinkSync(sitemap2Path)
     console.log('Deleted existing sitemap.xml from root directory')
   }
+
+  const notionCacheRoot = path.resolve(__dirname, '.next', 'cache', 'notion')
+  const dataDir = path.join(notionCacheRoot, 'data')
+  fs.rmSync(dataDir, { recursive: true, force: true })
 })()
 
 /**

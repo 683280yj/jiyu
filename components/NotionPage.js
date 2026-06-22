@@ -4,7 +4,7 @@ import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
 import 'katex/dist/katex.min.css'
 import dynamic from 'next/dynamic'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
 
 /**
@@ -14,6 +14,10 @@ import { NotionRenderer } from 'react-notion-x'
  * @returns
  */
 const NotionPage = ({ post, className }) => {
+  const recordMap = useMemo(
+    () => sanitizeRecordMap(post?.blockMap),
+    [post?.blockMap]
+  )
   // 是否关闭数据库和画册的点击跳转
   const POST_DISABLE_GALLERY_CLICK = siteConfig('POST_DISABLE_GALLERY_CLICK')
   const POST_DISABLE_DATABASE_CLICK = siteConfig('POST_DISABLE_DATABASE_CLICK')
@@ -124,7 +128,7 @@ const NotionPage = ({ post, className }) => {
       id='notion-article'
       className={`mx-auto overflow-hidden ${className || ''}`}>
       <NotionRenderer
-        recordMap={post?.blockMap}
+        recordMap={recordMap}
         mapPageUrl={mapPageUrl}
         mapImageUrl={mapImgUrl}
         components={{
@@ -141,6 +145,50 @@ const NotionPage = ({ post, className }) => {
       <PrismMac />
     </div>
   )
+}
+
+function sanitizeRecordMap(recordMap) {
+  if (!recordMap?.block) {
+    return recordMap
+  }
+
+  const block = {}
+  for (const [blockId, blockRecord] of Object.entries(recordMap.block)) {
+    if (isValidBlockRecord(blockRecord)) {
+      block[blockId] = blockRecord
+    }
+  }
+
+  const validBlockIds = new Set(Object.keys(block))
+  for (const [blockId, blockRecord] of Object.entries(block)) {
+    const content = blockRecord?.value?.content
+    if (!Array.isArray(content)) {
+      continue
+    }
+
+    const safeContent = content.filter(
+      id => typeof id === 'string' && validBlockIds.has(id)
+    )
+    if (safeContent.length !== content.length) {
+      block[blockId] = {
+        ...blockRecord,
+        value: {
+          ...blockRecord.value,
+          content: safeContent
+        }
+      }
+    }
+  }
+
+  return {
+    ...recordMap,
+    block
+  }
+}
+
+function isValidBlockRecord(blockRecord) {
+  const id = blockRecord?.value?.id
+  return typeof id === 'string' && id.length > 0
 }
 
 

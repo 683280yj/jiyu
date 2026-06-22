@@ -29,5 +29,5 @@ module.exports = {
     ext: process.env.NEXT_PUBLIC_NOTION_PROPERTY_EXT || 'ext'
   },
   NOTION_ACTIVE_USER: process.env.NOTION_ACTIVE_USER || '',
-  NOTION_TOKEN_V2: process.env.NOTION_TOKEN_V2 || '${{ secrets.NOTION_API_TOKEN }}'
+  NOTION_TOKEN_V2: process.env.NOTION_TOKEN_V2 || ''
 }
