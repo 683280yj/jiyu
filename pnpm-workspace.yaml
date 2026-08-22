@@ -1,0 +1,2 @@
+patchedDependencies:
+  notion-client@7.7.1: patches/notion-client@7.7.1.patch

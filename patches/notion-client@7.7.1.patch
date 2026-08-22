@@ -1,0 +1,14 @@
+diff --git a/build/index.js b/build/index.js
+index 6c970fcf7f789c8a59c265e45b57b2c4e069181b..a466f58980345f7bafe8032816fb5e70711042ad 100644
+--- a/build/index.js
++++ b/build/index.js
+@@ -506,7 +506,8 @@ var NotionAPI = class {
+       "Content-Type": "application/json"
+     };
+     if (this._authToken) {
+-      headers.cookie = `token_v2=${this._authToken}`;
++      const cookieName = this._authToken.startsWith('v03') ? 'token_v3' : 'token_v2';
++      headers.cookie = `${cookieName}=${this._authToken}`;
+     }
+     if (this._activeUser) {
+       headers["x-notion-active-user-header"] = this._activeUser;
