@@ -10,7 +10,7 @@ import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'
 import { getBaseLayoutByTheme } from '@/themes/theme'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getQueryParam } from '../lib/utils'
 
 // 各种扩展插件 这个要阻塞引入
@@ -51,9 +51,14 @@ const MyApp = ({ Component, pageProps }) => {
     [theme]
   )
 
-  const enableClerk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  const [enableClerk, setEnableClerk] = useState(false)
+
+  useEffect(() => {
+    setEnableClerk(Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY))
+  }, [])
+
   const content = (
-    <GlobalContextProvider {...pageProps}>
+    <GlobalContextProvider {...pageProps} enableClerk={enableClerk}>
       <GLayout {...pageProps}>
         <SEO {...pageProps} />
         <Component {...pageProps} />
