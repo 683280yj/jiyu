@@ -2,6 +2,7 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData, resolvePostProps } from '@/lib/db/SiteDataApi'
 import Slug from '..'
+import { stripMemberPostContent } from '@/lib/auth/members'
 import { checkSlugHasOneSlash } from '@/lib/utils/post'
 
 /**
@@ -51,7 +52,7 @@ export async function getStaticProps({ params: { prefix, slug }, locale }) {
   })
 
   return {
-    props,
+    props: stripMemberPostContent(props),
     revalidate: process.env.EXPORT
       ? undefined
       : siteConfig(
