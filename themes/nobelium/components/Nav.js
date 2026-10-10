@@ -135,6 +135,8 @@ const NavBar = props => {
     links = customMenu
   }
 
+  links.push({ name: '会员登录', href: '/member/login', show: true })
+
   if (!links || links.length === 0) {
     return null
   }
