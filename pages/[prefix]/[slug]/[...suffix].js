@@ -4,6 +4,7 @@ import { fetchGlobalAllData, resolvePostProps } from '@/lib/db/SiteDataApi'
 import { checkSlugHasMorThanTwoSlash, processPostData } from '@/lib/utils/post'
 import { idToUuid } from 'notion-utils'
 import Slug from '..'
+import { stripMemberPostContent } from '@/lib/auth/members'
 
 /**
  * 根据notion的slug访问页面
@@ -61,7 +62,7 @@ export async function getStaticProps({
   })
 
   return {
-    props,
+    props: stripMemberPostContent(props),
     revalidate: process.env.EXPORT
       ? undefined
       : siteConfig(
