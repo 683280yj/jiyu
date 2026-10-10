@@ -7,7 +7,7 @@ export function isMemberOnlyPost(post: { tags?: unknown } | null | undefined): b
   )
 }
 
-export function stripMemberPostContent<T extends { post?: Record<string, any> | null }>(props: T): T & { post: Record<string, any> | null; memberOnly: boolean } {
+export function stripMemberPostContent<T extends object>(props: T & { post?: any }): T & { post?: any; memberOnly: boolean } {
   if (!props?.post || !isMemberOnlyPost(props.post)) {
     return { ...props, memberOnly: false }
   }
