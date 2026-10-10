@@ -4,8 +4,7 @@ import {
   newOAuthState,
   safeReturnTo,
   xkzhiConfigured,
-  XkzhiProviders,
-  OAUTH_STATE_COOKIE
+  XkzhiProviders
 } from '@/lib/auth/xkzhi'
 
 const CALLBACK_URI =
