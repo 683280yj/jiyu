@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import BLOG from '@/blog.config'
 import { readMemberSession } from '@/lib/auth/xkzhi'
 import { isMemberOnlyPost } from '@/lib/auth/members'
 import { resolvePostProps } from '@/lib/db/SiteDataApi'
@@ -28,6 +29,7 @@ export default async function handler(
       prefix: segments[0],
       slug: segments[1],
       suffix: segments.slice(2),
+      locale: BLOG.LANG,
       from: 'member-content'
     })
     if (!props?.post || !isMemberOnlyPost(props.post)) {
